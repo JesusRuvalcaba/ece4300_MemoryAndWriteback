@@ -38,12 +38,7 @@ module memoryTB();
     end
 
     initial begin
-        $display("time\twb_ctlout\tbranch\tmemread\tmemwrite\tzero\talu_result\trdata2out\tfive_bit_muxout\tread_data\tmem_alu_result\tmem_write_reg\tMEM_PCSrc\tregwrite\tmemtoreg");
-        $monitor("%0t\t%b\t%b\t%b\t%b\t%b\t%h\t%h\t%h\t%h\t%h\t%h\t%b\t%b\t%b",
-                 $time, wb_ctlout, branch, memread, memwrite, zero,
-                 alu_result, rdata2out, five_bit_muxout,
-                 read_data, mem_alu_result, mem_write_reg,
-                 MEM_PCSrc, MEM_WB_regwrite, MEM_WB_memtoreg);
+        
 
         // Initial values
         wb_ctlout       = 2'b01;
