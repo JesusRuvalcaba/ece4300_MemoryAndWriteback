@@ -1,31 +1,35 @@
 //memoryTB.v
+`timescale 1ns / 1ps
 
 module memoryTB();
-    reg clk;
-    reg [31:0] ALUResult, WriteData;
-    reg [4:0] WriteReg;
-    reg [1:0] WBControl;
-    reg MemWrite, MemRead, Branch, Zero;
-    wire [31:0] ReadData, ALUResult_out;
-    wire [4:0] WriteReg_out;
-    wire [1:0] WBControl_out;
-    wire PCSrc;
 
-    mem_stage uut (
-        .clk(clk),
-        .ALUResult(ALUResult),
-        .WriteData(WriteData),
-        .WriteReg(WriteReg),
-        .WBControl(WBControl),
-        .MemWrite(MemWrite),
-        .MemRead(MemRead),
-        .Branch(Branch),
-        .Zero(Zero),
-        .ReadData(ReadData),
-        .ALUResult_out(ALUResult_out),
-        .WriteReg_out(WriteReg_out),
-        .WBControl_out(WBControl_out),
-        .PCSrc(PCSrc)
+    reg clk;
+    reg [1:0] wb_ctlout;
+    reg branch, memread, memwrite;
+    reg zero;
+    reg [31:0] alu_result, rdata2out;
+    reg [4:0] five_bit_muxout;
+
+    wire MEM_PCSrc;
+    wire MEM_WB_regwrite, MEM_WB_memtoreg;
+    wire [31:0] read_data, mem_alu_result;
+    wire [4:0] mem_write_reg;
+
+    MEMORY uut (
+        .wb_ctlout(wb_ctlout),
+        .branch(branch),
+        .memread(memread),
+        .memwrite(memwrite),
+        .zero(zero),
+        .alu_result(alu_result),
+        .rdata2out(rdata2out),
+        .five_bit_muxout(five_bit_muxout),
+        .MEM_PCSrc(MEM_PCSrc),
+        .MEM_WB_regwrite(MEM_WB_regwrite),
+        .MEM_WB_memtoreg(MEM_WB_memtoreg),
+        .read_data(read_data),
+        .mem_alu_result(mem_alu_result),
+        .mem_write_reg(mem_write_reg)
     );
 
     initial begin
@@ -34,50 +38,67 @@ module memoryTB();
     end
 
     initial begin
-        $display("Time\tclk\tALUResult\tWriteData\tWriteReg\tWBControl\tMemWrite\tMemRead\tBranch\tZero\tReadData\t\tALUResult_out\tWriteReg_out\tWBControl_out\tPCSrc");
-        $monitor("%0t\t%b\t%h\t%h\t%h\t%b\t%b\t%b\t%b\t%b\t%h\t%h\t%h\t%b\t%b",
-                 $time, clk, ALUResult, WriteData, WriteReg, WBControl,
-                 MemWrite, MemRead, Branch, Zero,
-                 ReadData, ALUResult_out, WriteReg_out, WBControl_out, PCSrc);
+        $display("time\twb_ctlout\tbranch\tmemread\tmemwrite\tzero\talu_result\trdata2out\tfive_bit_muxout\tread_data\tmem_alu_result\tmem_write_reg\tMEM_PCSrc\tregwrite\tmemtoreg");
+        $monitor("%0t\t%b\t%b\t%b\t%b\t%b\t%h\t%h\t%h\t%h\t%h\t%h\t%b\t%b\t%b",
+                 $time, wb_ctlout, branch, memread, memwrite, zero,
+                 alu_result, rdata2out, five_bit_muxout,
+                 read_data, mem_alu_result, mem_write_reg,
+                 MEM_PCSrc, MEM_WB_regwrite, MEM_WB_memtoreg);
 
         // Initial values
-        ALUResult = 32'h00000004;
-        WriteData = 32'h12345678;
-        WriteReg  = 5'h02;
-        WBControl = 2'b01;
-        MemWrite  = 0;
-        MemRead   = 1;
-        Branch    = 0;
-        Zero      = 0;
+        wb_ctlout       = 2'b01;
+        branch          = 0;
+        memread         = 0;
+        memwrite        = 0;
+        zero            = 0;
+        alu_result      = 32'h00000004;
+        rdata2out       = 32'h12345678;
+        five_bit_muxout = 5'd2;
 
         #10;
 
-        // Mem Write
-        MemWrite = 1;
-        MemRead  = 0;
+        // Write 12345678 into address 4
+        memwrite = 1;
+        memread  = 0;
         #10;
 
-        // Read back same location
-        MemWrite = 0;
-        MemRead  = 1;
+        // Stop write
+        memwrite = 0;
         #10;
 
-        // Branch test: should make PCSrc = 1
-        Branch = 1;
-        Zero   = 1;
+        // Read back from address 4
+        memread = 1;
         #10;
 
-        // Branch test: should make PCSrc = 0
-        Branch = 1;
-        Zero   = 0;
+        // Branch test: MEM_PCSrc should be 1
+        branch = 1;
+        zero   = 1;
         #10;
 
-        // Another read from different address
-        ALUResult = 32'h00000008;
-        Branch    = 0;
-        Zero      = 0;
-        MemRead   = 1;
-        MemWrite  = 0;
+        // Branch test: MEM_PCSrc should be 0
+        zero   = 0;
+        #10;
+
+        // Clear branch
+        branch = 0;
+        zero   = 0;
+        memread = 0;
+        #10;
+
+        // Write new value into address 8
+        alu_result      = 32'h00000008;
+        rdata2out       = 32'hABCD1234;
+        five_bit_muxout = 5'd5;
+        wb_ctlout       = 2'b10;
+        memwrite        = 1;
+        #10;
+
+        // Stop write
+        memwrite = 0;
+        #10;
+
+        // Read back from address 8
+        memread = 1;
         #10;
 
         $finish;
