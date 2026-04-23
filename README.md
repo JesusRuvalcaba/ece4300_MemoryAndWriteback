@@ -184,11 +184,18 @@ Zero   = 1;
 
 ## Timing Diagram Analysis
 
+
+Jesus Ruvalcaba Timing Diagram
+
+<img width="1657" height="488" alt="image" src="https://github.com/user-attachments/assets/bc3bfdbb-4dfa-45a3-8784-cb544c7b91d1" />
+
+
+Jan Pastor Timing Diagram
 ![MEM/WB Stage Timing Diagram](jannemini_verilog/MemWriteBack.png)
 
 The waveform image above was captured from Xilinx Vivado's behavioral simulation. The key observations from the timing diagram are as follows:
 
-### Signal Breakdown (Row by Row)
+### Signal Breakdown (Row by Row) - Jan Pastor
 
 | Row | Signal | Observation |
 |-----|--------|-------------|
