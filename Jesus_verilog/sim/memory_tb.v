@@ -38,23 +38,37 @@ module memoryTB();
     end
 
     initial begin
-        
 
         // Initial values
-        wb_ctlout       = 2'b01;
+        wb_ctlout       = 2'b00;
         branch          = 0;
         memread         = 0;
         memwrite        = 0;
         zero            = 0;
-        alu_result      = 32'h00000004;
+        alu_result      = 32'h00000000;
         rdata2out       = 32'h12345678;
         five_bit_muxout = 5'd2;
 
         #10;
-
+    
+        // read from address 4 before writing
+        
+      
+        
+        // read from address 8 before writing
+        alu_result  = 32'd4;
+        memread = 1;
+        #10;
+        
+      
+        alu_result = 32'd8;
+        #10;
+        
         // Write 12345678 into address 4
-        memwrite = 1;
+
         memread  = 0;
+        alu_result = 32'd4;
+        
         #10;
 
         // Stop write
@@ -80,7 +94,6 @@ module memoryTB();
         memread = 0;
         #10;
 
-        // Write new value into address 8
         alu_result      = 32'h00000008;
         rdata2out       = 32'hABCD1234;
         five_bit_muxout = 5'd5;
@@ -94,6 +107,23 @@ module memoryTB();
 
         // Read back from address 8
         memread = 1;
+        #10;
+        
+        // and gate stimuli
+        branch = 0; 
+        zero = 0; 
+        #10;
+        
+        branch = 0; 
+        zero = 1; 
+        #10;
+        
+        branch = 1; 
+        zero = 0; 
+        #10;
+        
+        branch = 1; 
+        zero = 1; 
         #10;
 
         $finish;
