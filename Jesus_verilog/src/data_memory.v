@@ -14,10 +14,9 @@ module data_memory (
         for (i = 0; i < 256; i = i + 1)
             DMEM[i] = 32'b0;
 
-        $readmemb("data.txt", DMEM);
+        $readmemb("data.mem", DMEM);
 
-        for (i = 0; i < 6; i = i + 1)
-            $display("\tDMEM[%0d] = %0b", i, DMEM[i]);
+       
     end
 
     always @(*) begin
